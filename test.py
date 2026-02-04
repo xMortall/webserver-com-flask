@@ -4,11 +4,17 @@ from pathlib import Path
 from dotenv import load_dotenv
 import mysql.connector
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 # Carrega o .env da mesma pasta do ficheiro
 load_dotenv(dotenv_path=Path(__file__).with_name(".env"))
 
 app = Flask(__name__)
+
+CORS(app, resources={
+    r"/inscricoes": {"origins": "*"},
+    r"/health": {"origins": "*"},
+})
 
 db_config = {
     "host": os.getenv("DB_HOST"),
@@ -128,8 +134,10 @@ class Inscricao:
 # -----------------------------
 # Rotas
 # -----------------------------
-@app.route("/inscricoes", methods=["POST"])
+@app.route("/inscricoes", methods=["POST", "OPTIONS"])
 def inserir_inscricao():
+    if request.method == "OPTIONS":
+        return ("", 204)
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         return jsonify({"erro": "JSON inválido ou vazio"}), 400
