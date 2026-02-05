@@ -13,6 +13,7 @@ app = Flask(__name__)
 
 CORS(app, resources={
     r"/inscricoes": {"origins": "*"},
+    r"/lista": {"origins": "*"}
 })
 
 db_config = {
@@ -176,7 +177,7 @@ def inserir_inscricao():
         return jsonify({"erro": "Erro interno"}), 500
 
 
-@app.route("/inscricoes", methods=["GET"])
+@app.route("/lista", methods=["GET"])
 def listar_inscricoes():
     try:
         sql = """
