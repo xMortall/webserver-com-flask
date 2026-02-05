@@ -13,7 +13,6 @@ app = Flask(__name__)
 
 CORS(app, resources={
     r"/inscricoes": {"origins": "*"},
-    r"/health": {"origins": "*"},
 })
 
 db_config = {
@@ -177,9 +176,37 @@ def inserir_inscricao():
         return jsonify({"erro": "Erro interno"}), 500
 
 
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "ok"}), 200
+@app.route("/inscricoes", methods=["GET"])
+def listar_inscricoes():
+    try:
+        sql = """
+        SELECT nome, email, curso
+        FROM inscricoes
+        ORDER BY id DESC
+        """
+
+        conn = get_db_connection()
+        try:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+        finally:
+            conn.close()
+
+        return jsonify({
+            "total": len(rows),
+            "data": rows
+        }), 200
+
+    except mysql.connector.Error as err:
+        return jsonify({
+            "erro": "Erro de base de dados",
+            "detalhe": str(err)
+        }), 500
+
+    except Exception:
+        return jsonify({"erro": "Erro interno"}), 500
+
 
 
 if __name__ == "__main__":
